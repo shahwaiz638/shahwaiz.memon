@@ -1,263 +1,123 @@
-/**
-* Template Name: iPortfolio
-* Template URL: https://bootstrapmade.com/iportfolio-bootstrap-portfolio-websites-template/
-* Updated: Mar 17 2024 with Bootstrap v5.3.3
-* Author: BootstrapMade.com
-* License: https://bootstrapmade.com/license/
-*/
+const body = document.body;
+const recruiterButton = document.querySelector('#recruiterMode');
+const projectCards = document.querySelectorAll('.project-card');
+const cursorTargets = document.querySelectorAll('a, button, .project-card, .timeline-item, .skill-row');
 
-(function() {
-  "use strict";
+const avatarFrame = document.querySelector('.avatar-frame');
+if (avatarFrame) {
+    avatarFrame.classList.add('rocket-frame');
+    const portrait = avatarFrame.querySelector('img');
+    const rocketWindow = document.createElement('span');
+    rocketWindow.className = 'rocket-window';
+    if (portrait) rocketWindow.append(portrait);
+    avatarFrame.append(rocketWindow);
+    avatarFrame.insertAdjacentHTML('beforeend', '<span class="rocket-fin rocket-fin-left"></span><span class="rocket-fin rocket-fin-right"></span><span class="rocket-flame"></span>');
+}
 
-  /**
-   * Easy selector helper function
-   */
-  const select = (el, all = false) => {
-    el = el.trim()
-    if (all) {
-      return [...document.querySelectorAll(el)]
-    } else {
-      return document.querySelector(el)
-    }
-  }
+const dot = document.createElement('span');
+dot.className = 'cursor-dot';
+const ring = document.createElement('span');
+ring.className = 'cursor-ring';
+const note = document.createElement('span');
+note.className = 'cursor-note';
+body.append(dot, ring, note);
 
-  /**
-   * Easy event listener function
-   */
-  const on = (type, el, listener, all = false) => {
-    let selectEl = select(el, all)
-    if (selectEl) {
-      if (all) {
-        selectEl.forEach(e => e.addEventListener(type, listener))
-      } else {
-        selectEl.addEventListener(type, listener)
-      }
-    }
-  }
+window.addEventListener('pointermove', (event) => {
+    dot.style.left = `${event.clientX}px`;
+    dot.style.top = `${event.clientY}px`;
+    ring.style.left = `${event.clientX}px`;
+    ring.style.top = `${event.clientY}px`;
+    note.style.left = `${event.clientX + 22}px`;
+    note.style.top = `${event.clientY - 18}px`;
+});
 
-  /**
-   * Easy on scroll event listener 
-   */
-  const onscroll = (el, listener) => {
-    el.addEventListener('scroll', listener)
-  }
-
-  /**
-   * Navbar links active state on scroll
-   */
-  let navbarlinks = select('#navbar .scrollto', true)
-  const navbarlinksActive = () => {
-    let position = window.scrollY + 200
-    navbarlinks.forEach(navbarlink => {
-      if (!navbarlink.hash) return
-      let section = select(navbarlink.hash)
-      if (!section) return
-      if (position >= section.offsetTop && position <= (section.offsetTop + section.offsetHeight)) {
-        navbarlink.classList.add('active')
-      } else {
-        navbarlink.classList.remove('active')
-      }
-    })
-  }
-  window.addEventListener('load', navbarlinksActive)
-  onscroll(document, navbarlinksActive)
-
-  /**
-   * Scrolls to an element with header offset
-   */
-  const scrollto = (el) => {
-    let elementPos = select(el).offsetTop
-    window.scrollTo({
-      top: elementPos,
-      behavior: 'smooth'
-    })
-  }
-
-  /**
-   * Back to top button
-   */
-  let backtotop = select('.back-to-top')
-  if (backtotop) {
-    const toggleBacktotop = () => {
-      if (window.scrollY > 100) {
-        backtotop.classList.add('active')
-      } else {
-        backtotop.classList.remove('active')
-      }
-    }
-    window.addEventListener('load', toggleBacktotop)
-    onscroll(document, toggleBacktotop)
-  }
-
-  /**
-   * Mobile nav toggle
-   */
-  on('click', '.mobile-nav-toggle', function(e) {
-    select('body').classList.toggle('mobile-nav-active')
-    this.classList.toggle('bi-list')
-    this.classList.toggle('bi-x')
-  })
-
-  /**
-   * Scrool with ofset on links with a class name .scrollto
-   */
-  on('click', '.scrollto', function(e) {
-    if (select(this.hash)) {
-      e.preventDefault()
-
-      let body = select('body')
-      if (body.classList.contains('mobile-nav-active')) {
-        body.classList.remove('mobile-nav-active')
-        let navbarToggle = select('.mobile-nav-toggle')
-        navbarToggle.classList.toggle('bi-list')
-        navbarToggle.classList.toggle('bi-x')
-      }
-      scrollto(this.hash)
-    }
-  }, true)
-
-  /**
-   * Scroll with ofset on page load with hash links in the url
-   */
-  window.addEventListener('load', () => {
-    if (window.location.hash) {
-      if (select(window.location.hash)) {
-        scrollto(window.location.hash)
-      }
-    }
-  });
-
-  /**
-   * Hero type effect
-   */
-  const typed = select('.typed')
-  if (typed) {
-    let typed_strings = typed.getAttribute('data-typed-items')
-    typed_strings = typed_strings.split(',')
-    new Typed('.typed', {
-      strings: typed_strings,
-      loop: true,
-      typeSpeed: 100,
-      backSpeed: 50,
-      backDelay: 2000
+cursorTargets.forEach((target) => {
+    target.addEventListener('pointerenter', () => {
+        const label = target.dataset.cursor || (target.classList.contains('project-card') ? 'OPEN WORLD' : 'EXPLORE');
+        note.textContent = label;
+        body.classList.add('cursor-active');
     });
-  }
+    target.addEventListener('pointerleave', () => body.classList.remove('cursor-active'));
+});
 
-  /**
-   * Skills animation
-   */
-  let skilsContent = select('.skills-content');
-  if (skilsContent) {
-    new Waypoint({
-      element: skilsContent,
-      offset: '80%',
-      handler: function(direction) {
-        let progress = select('.progress .progress-bar', true);
-        progress.forEach((el) => {
-          el.style.width = el.getAttribute('aria-valuenow') + '%'
+recruiterButton?.addEventListener('click', () => {
+    body.classList.toggle('recruiter-mode');
+    recruiterButton.classList.toggle('active');
+    recruiterButton.innerHTML = body.classList.contains('recruiter-mode')
+        ? '<i class="bi bi-check2"></i> QUICK READ ON'
+        : '<i class="bi bi-lightning-charge-fill"></i> RECRUITER MODE';
+    if (body.classList.contains('recruiter-mode')) document.querySelector('#work').scrollIntoView({ behavior: 'smooth' });
+});
+
+const worldModal = document.createElement('div');
+worldModal.className = 'world-modal';
+worldModal.innerHTML = '<div class="world-window"><button class="world-close" type="button" aria-label="Close project view">ESC / CLOSE</button><p class="world-kicker"></p><h3></h3><p class="world-description"></p><div class="world-meta"></div></div>';
+body.append(worldModal);
+
+const closeWorld = () => {
+    worldModal.classList.remove('open');
+    body.classList.remove('world-open');
+};
+
+worldModal.querySelector('.world-close').addEventListener('click', closeWorld);
+worldModal.addEventListener('click', (event) => {
+    if (event.target === worldModal) closeWorld();
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeWorld();
+});
+
+projectCards.forEach((card) => {
+    card.dataset.cursor = 'ZOOM INTO WORLD';
+    card.addEventListener('click', () => {
+        const title = card.querySelector('h3')?.innerText.replace(/\n/g, ' ') || 'Project world';
+        const description = card.querySelector('.project-body p:not(.project-type)')?.innerText || '';
+        const type = card.querySelector('.project-type')?.innerText || 'PROJECT';
+        const tags = [...card.querySelectorAll('.tag-row span')].map((tag) => `<span>${tag.innerText}</span>`).join('');
+        worldModal.querySelector('.world-kicker').textContent = type;
+        worldModal.querySelector('h3').textContent = title;
+        worldModal.querySelector('.world-description').textContent = description;
+        worldModal.querySelector('.world-meta').innerHTML = tags;
+        worldModal.classList.add('open');
+        body.classList.add('world-open');
+    });
+});
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach((element) => observer.observe(element));
+
+const contactForm = document.querySelector('#contactForm');
+const transmitStatus = document.querySelector('#transmitStatus');
+// TODO: replace with your own Formspree endpoint — sign up free at https://formspree.io,
+// create a form, and paste its endpoint URL below (looks like https://formspree.io/f/xxxxxxx)
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/your_form_id';
+
+contactForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(contactForm);
+    transmitStatus.textContent = 'TRANSMITTING...';
+    transmitStatus.className = 'transmit-status pending';
+    try {
+        const response = await fetch(FORMSPREE_ENDPOINT, {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
         });
-      }
-    })
-  }
-
-  /**
-   * Porfolio isotope and filter
-   */
-  window.addEventListener('load', () => {
-    let portfolioContainer = select('.portfolio-container');
-    if (portfolioContainer) {
-      let portfolioIsotope = new Isotope(portfolioContainer, {
-        itemSelector: '.portfolio-item'
-      });
-
-      let portfolioFilters = select('#portfolio-flters li', true);
-
-      on('click', '#portfolio-flters li', function(e) {
-        e.preventDefault();
-        portfolioFilters.forEach(function(el) {
-          el.classList.remove('filter-active');
-        });
-        this.classList.add('filter-active');
-
-        portfolioIsotope.arrange({
-          filter: this.getAttribute('data-filter')
-        });
-        portfolioIsotope.on('arrangeComplete', function() {
-          AOS.refresh()
-        });
-      }, true);
+        if (response.ok) {
+            transmitStatus.textContent = 'SIGNAL RECEIVED // THANKS, REPLYING SOON';
+            transmitStatus.className = 'transmit-status success';
+            contactForm.reset();
+        } else {
+            throw new Error('Request failed');
+        }
+    } catch (err) {
+        transmitStatus.textContent = 'TRANSMISSION FAILED // EMAIL ME DIRECTLY INSTEAD';
+        transmitStatus.className = 'transmit-status error';
     }
-
-  });
-
-  /**
-   * Initiate portfolio lightbox 
-   */
-  const portfolioLightbox = GLightbox({
-    selector: '.portfolio-lightbox'
-  });
-
-  /**
-   * Portfolio details slider
-   */
-  new Swiper('.portfolio-details-slider', {
-    speed: 400,
-    loop: true,
-    autoplay: {
-      delay: 5000,
-      disableOnInteraction: false
-    },
-    pagination: {
-      el: '.swiper-pagination',
-      type: 'bullets',
-      clickable: true
-    }
-  });
-
-  /**
-   * Testimonials slider
-   */
-  new Swiper('.testimonials-slider', {
-    speed: 600,
-    loop: true,
-    autoplay: {
-      delay: 5000,
-      disableOnInteraction: false
-    },
-    slidesPerView: 'auto',
-    pagination: {
-      el: '.swiper-pagination',
-      type: 'bullets',
-      clickable: true
-    },
-    breakpoints: {
-      320: {
-        slidesPerView: 1,
-        spaceBetween: 20
-      },
-
-      1200: {
-        slidesPerView: 3,
-        spaceBetween: 20
-      }
-    }
-  });
-
-  /**
-   * Animation on scroll
-   */
-  window.addEventListener('load', () => {
-    AOS.init({
-      duration: 1000,
-      easing: 'ease-in-out',
-      once: true,
-      mirror: false
-    })
-  });
-
-  /**
-   * Initiate Pure Counter 
-   */
-  new PureCounter();
-
-})()
+});
